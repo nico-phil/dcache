@@ -1,4 +1,4 @@
-package main
+package cache
 
 import (
 	"fmt"
@@ -22,6 +22,7 @@ func (c *Cache) Add(key string, value []byte) error {
 	_, ok := c.db[key]
 	if !ok {
 		c.db[key] = value
+		return nil
 	}
 
 	return fmt.Errorf("Cache-Add: key already exist")
@@ -36,9 +37,17 @@ func (c *Cache) Get(k string) ([]byte, error) {
 	}
 
 	return v, nil
-
 }
 
-func main() {
+func (c *Cache) Delete(k string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
+	_, ok := c.db[k]
+	if !ok {
+		return fmt.Errorf("Cache-Get: key does not exist: %s", k)
+	}
+
+	delete(c.db, k)
+	return nil
 }
