@@ -13,11 +13,10 @@ func TestCache(t *testing.T) {
 	b, err := json.Marshal([]byte("world"))
 	require.NoError(t, err)
 
-	err = testCache.Add("hello", b)
-	require.NoError(t, err)
+	testCache.Set("hello", b)
 
-	v, err := testCache.Get("hello")
-	require.NoError(t, err)
+	v, ok := testCache.Get("hello")
+	require.True(t, ok)
 	require.Equal(t, v, b)
 
 	err = testCache.Delete("hello")
