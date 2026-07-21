@@ -6,7 +6,7 @@ import (
 )
 
 type Cache struct {
-	mu sync.Mutex
+	mu sync.RWMutex
 	db map[string][]byte
 }
 
@@ -16,36 +16,31 @@ func NewCache() *Cache {
 	}
 }
 
-func (c *Cache) Add(key string, value []byte) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	_, ok := c.db[key]
-	if !ok {
-		c.db[key] = value
-		return nil
-	}
+func (c *Cache) Set(key string, value []byte) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
-	return fmt.Errorf("Cache-Add: key already exist")
+	c.db[key] = value
+
 }
 
-func (c *Cache) Get(k string) ([]byte, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (c *Cache) Get(k string) ([]byte, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	v, ok := c.db[k]
 	if !ok {
-		return nil, fmt.Errorf("Cache-Get: key does not exist: %s", k)
+		return nil, false
 	}
-
-	return v, nil
+	return v, true
 }
 
 func (c *Cache) Delete(k string) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	_, ok := c.db[k]
 	if !ok {
-		return fmt.Errorf("Cache-Get: key does not exist: %s", k)
+		return fmt.Errorf("Cache-Delete: key does not exist: %s", k)
 	}
 
 	delete(c.db, k)
