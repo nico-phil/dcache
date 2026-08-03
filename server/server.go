@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/nico-phil/dcache/cache"
 )
@@ -21,13 +22,15 @@ func (s *CacheServer) SetHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Key   string `json:"key"`
 		Value []byte `json:"value"`
+		TTL   int64  `json:"ttl"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	s.cache.Set(req.Key, req.Value)
+
+	s.cache.Set(req.Key, req.Value, time.Duration(req.TTL)*time.Second)
 }
 func (s *CacheServer) GetHandler(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
@@ -38,7 +41,11 @@ func (s *CacheServer) GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string][]byte{"value": value})
+	err := json.NewEncoder(w).Encode(map[string][]byte{"value": value})
+	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *CacheServer) Start() error {
