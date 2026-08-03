@@ -64,3 +64,25 @@ func (c *Cache) Delete(k string) error {
 	delete(c.db, k)
 	return nil
 }
+
+func (c *Cache) StartEvictionLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+
+	go func() {
+		for range ticker.C {
+			c.evictExpiredItems()
+		}
+	}()
+
+}
+
+func (c *Cache) evictExpiredItems() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for k, v := range c.db {
+		if v.IsExpired() {
+			delete(c.db, k)
+		}
+	}
+}
