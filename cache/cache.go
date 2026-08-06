@@ -27,8 +27,8 @@ func NewCache() *Cache {
 }
 
 func (c *Cache) Set(key string, value []byte, ttl time.Duration) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if ttl <= 0 {
 		ttl = time.Hour * 24 // default TTL of 24 hours
 	}

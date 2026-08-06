@@ -55,5 +55,5 @@ func (dll *DLL) Print() {
 		fmt.Printf("%s->", current.Key)
 		current = current.Next
 	}
-	fmt.Println("\nTail:", dll.Tail.Prev.Key)
+	fmt.Println("\nTail:", dll.Tail.Key)
 }
