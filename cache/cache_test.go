@@ -9,7 +9,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	testCache := NewCache()
+	testCache := NewCache(50)
 
 	b, err := json.Marshal([]byte("world"))
 	require.NoError(t, err)

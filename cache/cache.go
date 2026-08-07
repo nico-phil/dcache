@@ -7,8 +7,10 @@ import (
 )
 
 type Cache struct {
-	mu sync.RWMutex
-	db map[string]CacheItem
+	mu           sync.RWMutex
+	db           map[string]CacheItem
+	capacity     int
+	evictionList *DLL
 }
 
 type CacheItem struct {
@@ -20,9 +22,11 @@ func (c *CacheItem) IsExpired() bool {
 	return time.Now().After(c.ExpiryTime)
 }
 
-func NewCache() *Cache {
+func NewCache(capacity int) *Cache {
 	return &Cache{
-		db: make(map[string]CacheItem, 0),
+		db:           make(map[string]CacheItem, 0),
+		capacity:     capacity,
+		evictionList: NewDLL(),
 	}
 }
 
@@ -86,3 +90,5 @@ func (c *Cache) evictExpiredItems() {
 		}
 	}
 }
+
+func (*Cache) EvictLRU() {}
