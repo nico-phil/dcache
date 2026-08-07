@@ -12,9 +12,9 @@ type CacheServer struct {
 	cache *cache.Cache
 }
 
-func NewCacheServer() *CacheServer {
+func NewCacheServer(cacheCapacity int) *CacheServer {
 	return &CacheServer{
-		cache: cache.NewCache(),
+		cache: cache.NewCache(cacheCapacity),
 	}
 }
 
